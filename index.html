@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus AI</title>
+    <title>Nexus</title>
     <style>
         * {
             margin: 0;
@@ -12,222 +12,178 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #000000;
-            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #000;
+            color: #fff;
             height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
 
         .header {
-            padding: 24px 32px;
-            border-bottom: 1px solid #1a1a1a;
-            background: linear-gradient(180deg, #0a0a0a 0%, #000000 100%);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            padding: 20px 30px;
+            border-bottom: 1px solid #222;
+            background: #000;
         }
 
         .header h1 {
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: 3px;
-            background: linear-gradient(90deg, #ffffff 0%, #888888 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 2px;
         }
 
-        .header .status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 8px;
-            font-size: 13px;
-            color: #666;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #00ff00;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-
-        .chat-container {
+        .chat {
             flex: 1;
             overflow-y: auto;
-            padding: 32px;
+            padding: 30px;
             display: flex;
             flex-direction: column;
             gap: 20px;
-            background: radial-gradient(ellipse at top, #0a0a0a 0%, #000000 100%);
         }
 
-        .message {
+        .msg {
             display: flex;
-            gap: 16px;
-            max-width: 75%;
-            animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            gap: 12px;
+            max-width: 70%;
+            animation: fadeIn 0.3s;
         }
 
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(20px); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .message.user {
+        .msg.user {
             align-self: flex-end;
             flex-direction: row-reverse;
         }
 
-        .message.assistant {
+        .msg.ai {
             align-self: flex-start;
         }
 
         .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            font-size: 16px;
+            font-weight: 600;
+            font-size: 14px;
             flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
 
-        .message.user .avatar {
-            background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
+        .msg.user .avatar {
+            background: #fff;
             color: #000;
         }
 
-        .message.assistant .avatar {
-            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+        .msg.ai .avatar {
+            background: #1a1a1a;
             color: #fff;
             border: 1px solid #333;
         }
 
-        .message-content {
-            padding: 16px 20px;
-            border-radius: 16px;
-            line-height: 1.6;
+        .content {
+            padding: 14px 18px;
+            border-radius: 14px;
+            line-height: 1.5;
             font-size: 15px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
-        .message.user .message-content {
-            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
-            border: 1px solid #333;
+        .msg.user .content {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
         }
 
-        .message.assistant .message-content {
-            background: linear-gradient(135deg, #0f0f0f 0%, #050505 100%);
+        .msg.ai .content {
+            background: #0a0a0a;
             border: 1px solid #1a1a1a;
         }
 
-        .thinking {
+        .typing {
             display: flex;
-            gap: 6px;
-            padding: 16px 20px;
-            align-items: center;
+            gap: 5px;
+            padding: 14px 18px;
         }
 
-        .thinking-dot {
-            width: 10px;
-            height: 10px;
+        .typing span {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            background: #666;
-            animation: bounce 1.4s infinite ease-in-out;
+            background: #555;
+            animation: bounce 1.4s infinite;
         }
 
-        .thinking-dot:nth-child(1) { animation-delay: -0.32s; }
-        .thinking-dot:nth-child(2) { animation-delay: -0.16s; }
+        .typing span:nth-child(2) { animation-delay: 0.2s; }
+        .typing span:nth-child(3) { animation-delay: 0.4s; }
 
         @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
         }
 
-        .input-container {
-            padding: 24px 32px;
-            border-top: 1px solid #1a1a1a;
-            background: linear-gradient(0deg, #0a0a0a 0%, #000000 100%);
+        .input-area {
+            padding: 20px 30px;
+            border-top: 1px solid #222;
+            background: #000;
         }
 
-        .input-wrapper {
+        .input-box {
             display: flex;
             gap: 12px;
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
-            position: relative;
         }
 
-        #messageInput {
+        #input {
             flex: 1;
             background: #0f0f0f;
-            border: 2px solid #1a1a1a;
-            border-radius: 16px;
-            padding: 16px 24px;
+            border: 1px solid #2a2a2a;
+            border-radius: 20px;
+            padding: 14px 20px;
             color: #fff;
             font-size: 15px;
             outline: none;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        #messageInput:focus {
-            border-color: #333;
-            background: #1a1a1a;
-            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
+        #input:focus {
+            border-color: #444;
         }
 
-        #sendButton {
-            background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
+        #send {
+            background: #fff;
             border: none;
-            border-radius: 12px;
-            width: 52px;
-            height: 52px;
+            border-radius: 50%;
+            width: 46px;
+            height: 46px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+            transition: transform 0.2s;
         }
 
-        #sendButton:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+        #send:hover:not(:disabled) {
+            transform: scale(1.05);
         }
 
-        #sendButton:active:not(:disabled) {
-            transform: translateY(0);
-        }
-
-        #sendButton:disabled {
+        #send:disabled {
             opacity: 0.3;
             cursor: not-allowed;
         }
 
-        #sendButton svg {
-            width: 22px;
-            height: 22px;
+        #send svg {
+            width: 20px;
+            height: 20px;
             stroke: #000;
             fill: none;
-            stroke-width: 2.5;
-            stroke-linecap: round;
-            stroke-linejoin: round;
+            stroke-width: 2;
         }
 
         ::-webkit-scrollbar {
-            width: 10px;
+            width: 8px;
         }
 
         ::-webkit-scrollbar-track {
@@ -235,50 +191,22 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #1a1a1a;
-            border-radius: 5px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
             background: #2a2a2a;
-        }
-
-        .brain-indicator {
-            font-size: 11px;
-            color: #444;
-            margin-top: 8px;
-            font-family: 'Courier New', monospace;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>NEXUS</h1>
-        <div class="status">
-            <div class="status-dot"></div>
-            <span>Neural Network Active</span>
-        </div>
-        <div class="brain-indicator">🧠 Learning from conversation...</div>
     </div>
 
-    <div class="chat-container" id="chatContainer">
-        <div class="message assistant">
-            <div class="avatar">N</div>
-            <div class="message-content">
-                Hello! I'm Nexus, an AI with a neural network brain. I learn from our conversations and can understand context, emotions, and complex topics. What would you like to talk about?
-            </div>
-        </div>
-    </div>
+    <div class="chat" id="chat"></div>
 
-    <div class="input-container">
-        <div class="input-wrapper">
-            <input 
-                type="text" 
-                id="messageInput" 
-                placeholder="Ask me anything..."
-                autocomplete="off"
-            >
-            <button id="sendButton">
+    <div class="input-area">
+        <div class="input-box">
+            <input type="text" id="input" placeholder="Message Nexus..." autocomplete="off">
+            <button id="send">
                 <svg viewBox="0 0 24 24">
                     <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
                 </svg>
@@ -287,304 +215,103 @@
     </div>
 
     <script>
-        // Neural Network Implementation
-        class NeuralNetwork {
-            constructor() {
-                this.weights = {
-                    input: this.randomMatrix(50, 100),
-                    hidden: this.randomMatrix(100, 100),
-                    output: this.randomMatrix(100, 50)
-                };
-                this.memory = [];
-                this.context = [];
-                this.learningRate = 0.01;
-                this.patterns = this.initializePatterns();
-            }
+        const chat = document.getElementById('chat');
+        const input = document.getElementById('input');
+        const send = document.getElementById('send');
+        let history = [];
 
-            randomMatrix(rows, cols) {
-                return Array.from({ length: rows }, () =>
-                    Array.from({ length: cols }, () => Math.random() * 2 - 1)
-                );
-            }
-
-            initializePatterns() {
-                return {
-                    greetings: ['hello', 'hi', 'hey', 'greetings', 'sup', 'yo'],
-                    questions: ['what', 'why', 'how', 'when', 'where', 'who', 'can you', 'could you', 'would you'],
-                    emotions: {
-                        happy: ['happy', 'glad', 'joy', 'excited', 'great', 'awesome', 'wonderful', 'fantastic'],
-                        sad: ['sad', 'unhappy', 'depressed', 'down', 'upset', 'disappointed'],
-                        angry: ['angry', 'mad', 'furious', 'annoyed', 'frustrated'],
-                        confused: ['confused', 'lost', 'dont understand', 'unclear', 'puzzled']
-                    },
-                    topics: {
-                        tech: ['code', 'programming', 'computer', 'software', 'ai', 'algorithm', 'data'],
-                        science: ['physics', 'chemistry', 'biology', 'space', 'research', 'experiment'],
-                        life: ['advice', 'help', 'problem', 'situation', 'feel', 'think', 'believe'],
-                        creative: ['story', 'write', 'create', 'imagine', 'idea', 'design']
-                    }
-                };
-            }
-
-            tokenize(text) {
-                return text.toLowerCase()
-                    .replace(/[^\w\s]/g, ' ')
-                    .split(/\s+/)
-                    .filter(word => word.length > 0);
-            }
-
-            embed(tokens) {
-                const embedding = new Array(50).fill(0);
-                tokens.forEach((token, idx) => {
-                    const hash = this.hash(token);
-                    embedding[hash % 50] += 1 / (idx + 1);
-                });
-                return embedding;
-            }
-
-            hash(str) {
-                let hash = 0;
-                for (let i = 0; i < str.length; i++) {
-                    hash = ((hash << 5) - hash) + str.charCodeAt(i);
-                    hash = hash & hash;
-                }
-                return Math.abs(hash);
-            }
-
-            sigmoid(x) {
-                return 1 / (1 + Math.exp(-x));
-            }
-
-            matMul(vec, matrix) {
-                return matrix[0].map((_, colIdx) =>
-                    vec.reduce((sum, val, rowIdx) => 
-                        sum + val * (matrix[rowIdx]?.[colIdx] || 0), 0)
-                );
-            }
-
-            forward(input) {
-                let hidden1 = this.matMul(input, this.weights.input).map(x => this.sigmoid(x));
-                let hidden2 = this.matMul(hidden1, this.weights.hidden).map(x => this.sigmoid(x));
-                let output = this.matMul(hidden2, this.weights.output);
-                return { hidden1, hidden2, output };
-            }
-
-            analyzeEmotion(tokens) {
-                for (let [emotion, words] of Object.entries(this.patterns.emotions)) {
-                    if (tokens.some(token => words.includes(token))) {
-                        return emotion;
-                    }
-                }
-                return 'neutral';
-            }
-
-            analyzeTopic(tokens) {
-                let topicScores = {};
-                for (let [topic, keywords] of Object.entries(this.patterns.topics)) {
-                    topicScores[topic] = tokens.filter(token => 
-                        keywords.includes(token)
-                    ).length;
-                }
-                return Object.keys(topicScores).reduce((a, b) => 
-                    topicScores[a] > topicScores[b] ? a : b
-                );
-            }
-
-            isQuestion(tokens, text) {
-                return text.includes('?') || 
-                       this.patterns.questions.some(q => tokens.includes(q));
-            }
-
-            learn(input, output) {
-                this.memory.push({ input, output, timestamp: Date.now() });
-                if (this.memory.length > 50) this.memory.shift();
-            }
-
-            getContext() {
-                return this.context.slice(-5);
-            }
-
-            process(text) {
-                const tokens = this.tokenize(text);
-                const embedding = this.embed(tokens);
-                const { output } = this.forward(embedding);
-                
-                const emotion = this.analyzeEmotion(tokens);
-                const topic = this.analyzeTopic(tokens);
-                const isQuestion = this.isQuestion(tokens, text);
-                
-                this.context.push({ tokens, emotion, topic, isQuestion });
-                if (this.context.length > 10) this.context.shift();
-                
-                return {
-                    tokens,
-                    embedding,
-                    output,
-                    emotion,
-                    topic,
-                    isQuestion,
-                    context: this.getContext()
-                };
-            }
-
-            generateResponse(analysis) {
-                const { tokens, emotion, topic, isQuestion, context } = analysis;
-                
-                // Check for greetings
-                if (tokens.some(t => this.patterns.greetings.includes(t))) {
-                    const greetings = [
-                        "Hey! Great to see you. What's on your mind?",
-                        "Hello! How can I help you today?",
-                        "Hi there! What would you like to explore?",
-                        "Greetings! I'm ready to assist you."
-                    ];
-                    return greetings[Math.floor(Math.random() * greetings.length)];
-                }
-
-                // Emotional responses
-                if (emotion === 'sad') {
-                    return "I sense you might be feeling down. I'm here to listen and help if you'd like to talk about it. What's troubling you?";
-                }
-                if (emotion === 'happy') {
-                    return "That's wonderful! I love the positive energy. What's making you feel so great?";
-                }
-                if (emotion === 'confused') {
-                    return "I understand it can be confusing. Let me try to break this down for you. What specifically would you like me to clarify?";
-                }
-
-                // Topic-based responses
-                if (topic === 'tech') {
-                    if (isQuestion) {
-                        return "That's an interesting technical question. From my neural network analysis, I can help you explore this. Could you give me more specific details about what you're trying to achieve?";
-                    }
-                    return "Technology is fascinating! I'm processing what you've shared. My neural pathways suggest we could dive deeper into this topic.";
-                }
-
-                if (topic === 'science') {
-                    return "Science is all about understanding patterns, much like how my neural network works! What aspect interests you most?";
-                }
-
-                if (topic === 'life') {
-                    return "Life questions are complex and deeply personal. Based on our conversation context, I think I understand where you're coming from. Let's explore this together.";
-                }
-
-                if (topic === 'creative') {
-                    return "I love creative thinking! My neural network thrives on novel patterns. Let's create something interesting together. What's your vision?";
-                }
-
-                // Question handling
-                if (isQuestion) {
-                    const questionResponses = [
-                        "That's a great question. Let me analyze this using my neural network. Based on the patterns I've learned, here's what I think:",
-                        "Interesting query! My neural pathways are processing this. Here's my analysis:",
-                        "Let me think about that. Accessing my learned patterns... Here's my perspective:",
-                        "Good question! Drawing from my neural network's understanding:"
-                    ];
-                    return questionResponses[Math.floor(Math.random() * questionResponses.length)];
-                }
-
-                // Context-aware responses
-                if (context.length > 2) {
-                    const prevTopics = context.map(c => c.topic);
-                    const sameTopicCount = prevTopics.filter(t => t === topic).length;
-                    
-                    if (sameTopicCount >= 2) {
-                        return "I notice we've been exploring this topic together. My neural network has built up context about our conversation. Would you like to go deeper or shift to something else?";
-                    }
-                }
-
-                // Default intelligent responses
-                const defaultResponses = [
-                    "I've processed your input through my neural layers. That's an interesting perspective. Tell me more about your thoughts on this.",
-                    "My neural network has analyzed your message. I find this topic engaging. What aspects are most important to you?",
-                    "Interesting input! My neurons are firing with various connections. How does this relate to what you're trying to accomplish?",
-                    "I'm learning from our conversation. Each exchange helps me understand you better. Please continue sharing your thoughts.",
-                    "My neural pathways suggest there's more to explore here. What other details can you share?"
-                ];
-                
-                return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
-            }
-        }
-
-        // Chat Interface
-        const chatContainer = document.getElementById('chatContainer');
-        const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
-        const brain = new NeuralNetwork();
-
-        function addMessage(role, content) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${role}`;
+        function add(role, text) {
+            const msg = document.createElement('div');
+            msg.className = `msg ${role}`;
             
             const avatar = document.createElement('div');
             avatar.className = 'avatar';
             avatar.textContent = role === 'user' ? 'U' : 'N';
             
-            const messageContent = document.createElement('div');
-            messageContent.className = 'message-content';
-            messageContent.textContent = content;
+            const content = document.createElement('div');
+            content.className = 'content';
+            content.textContent = text;
             
-            messageDiv.appendChild(avatar);
-            messageDiv.appendChild(messageContent);
-            chatContainer.appendChild(messageDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            msg.appendChild(avatar);
+            msg.appendChild(content);
+            chat.appendChild(msg);
+            chat.scrollTop = chat.scrollHeight;
         }
 
-        function showThinking() {
-            const thinkingDiv = document.createElement('div');
-            thinkingDiv.className = 'message assistant';
-            thinkingDiv.id = 'thinking';
+        function showTyping() {
+            const msg = document.createElement('div');
+            msg.className = 'msg ai';
+            msg.id = 'typing';
             
             const avatar = document.createElement('div');
             avatar.className = 'avatar';
             avatar.textContent = 'N';
             
-            const thinking = document.createElement('div');
-            thinking.className = 'thinking';
-            thinking.innerHTML = '<div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div>';
+            const typing = document.createElement('div');
+            typing.className = 'typing';
+            typing.innerHTML = '<span></span><span></span><span></span>';
             
-            thinkingDiv.appendChild(avatar);
-            thinkingDiv.appendChild(thinking);
-            chatContainer.appendChild(thinkingDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            msg.appendChild(avatar);
+            msg.appendChild(typing);
+            chat.appendChild(msg);
+            chat.scrollTop = chat.scrollHeight;
         }
 
-        function removeThinking() {
-            const thinking = document.getElementById('thinking');
-            if (thinking) thinking.remove();
+        function hideTyping() {
+            const t = document.getElementById('typing');
+            if (t) t.remove();
         }
 
-        async function sendMessage() {
-            const message = messageInput.value.trim();
-            if (!message) return;
+        async function sendMsg() {
+            const text = input.value.trim();
+            if (!text) return;
 
-            messageInput.value = '';
-            sendButton.disabled = true;
+            input.value = '';
+            send.disabled = true;
             
-            addMessage('user', message);
-            showThinking();
+            add('user', text);
+            history.push({ role: 'user', content: text });
+            
+            showTyping();
 
-            // Simulate neural processing time
-            await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 700));
+            try {
+                const res = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 1000,
+                        messages: history
+                    })
+                });
 
-            const analysis = brain.process(message);
-            const response = brain.generateResponse(analysis);
+                const data = await res.json();
+                
+                hideTyping();
+                
+                if (data.content && data.content[0]) {
+                    const reply = data.content[0].text;
+                    add('ai', reply);
+                    history.push({ role: 'assistant', content: reply });
+                } else {
+                    add('ai', 'Sorry, I had trouble processing that.');
+                }
+            } catch (err) {
+                hideTyping();
+                add('ai', 'Connection error. Please try again.');
+            }
             
-            brain.learn(message, response);
-            
-            removeThinking();
-            addMessage('assistant', response);
-            
-            sendButton.disabled = false;
-            messageInput.focus();
+            send.disabled = false;
+            input.focus();
         }
 
-        sendButton.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
+        send.addEventListener('click', sendMsg);
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMsg();
         });
 
-        messageInput.focus();
+        add('ai', 'Hey! What can I help you with?');
+        input.focus();
     </script>
 </body>
 </html>
