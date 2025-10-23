@@ -215,10 +215,462 @@
     </div>
 
     <script>
+        class Brain {
+            constructor() {
+                this.memory = {
+                    shortTerm: [],
+                    longTerm: [],
+                    semantic: this.initKnowledge(),
+                    episodic: [],
+                    emotional: { valence: 0, arousal: 0 }
+                };
+                this.personality = {
+                    openness: 0.8,
+                    conscientiousness: 0.7,
+                    extraversion: 0.6,
+                    agreeableness: 0.9,
+                    curiosity: 0.85
+                };
+                this.cognitiveState = {
+                    attention: 1.0,
+                    workingMemory: [],
+                    context: null,
+                    goals: []
+                };
+            }
+
+            initKnowledge() {
+                return {
+                    facts: {
+                        science: ['photosynthesis converts light to energy', 'dna contains genetic information', 'speed of light is 299792458 m/s', 'water is h2o', 'gravity is 9.8 m/s^2'],
+                        math: ['pi is 3.14159', 'pythagoras theorem a^2 + b^2 = c^2', 'e is 2.71828', 'golden ratio is 1.618'],
+                        history: ['ww2 ended 1945', 'moon landing 1969', 'internet created 1960s', 'first computer 1940s'],
+                        tech: ['ai uses neural networks', 'quantum computers use qubits', 'blockchain is distributed ledger', 'cloud computing uses remote servers'],
+                        general: ['earth orbits sun', 'humans need oxygen', 'water freezes at 0c', 'light travels in waves']
+                    },
+                    concepts: {
+                        abstract: ['love', 'justice', 'beauty', 'truth', 'freedom', 'consciousness', 'meaning', 'purpose'],
+                        emotions: ['joy', 'sadness', 'anger', 'fear', 'surprise', 'disgust', 'trust', 'anticipation'],
+                        relations: ['cause', 'effect', 'similarity', 'difference', 'part', 'whole', 'category', 'instance']
+                    },
+                    procedures: {
+                        reasoning: ['deduction', 'induction', 'abduction', 'analogy'],
+                        problem_solving: ['analysis', 'synthesis', 'evaluation', 'creativity'],
+                        social: ['empathy', 'theory_of_mind', 'communication', 'cooperation']
+                    }
+                };
+            }
+
+            perceive(input) {
+                const tokens = input.toLowerCase().match(/\b\w+\b/g) || [];
+                const sentences = input.match(/[^.!?]+[.!?]+/g) || [input];
+                
+                const features = {
+                    tokens: tokens,
+                    length: tokens.length,
+                    sentences: sentences,
+                    questions: (input.match(/\?/g) || []).length,
+                    exclamations: (input.match(/!/g) || []).length,
+                    sentiment: this.analyzeSentiment(tokens),
+                    topics: this.extractTopics(tokens),
+                    entities: this.extractEntities(tokens),
+                    intent: this.classifyIntent(tokens, input)
+                };
+
+                return features;
+            }
+
+            analyzeSentiment(tokens) {
+                const positive = ['good', 'great', 'awesome', 'excellent', 'amazing', 'wonderful', 'love', 'happy', 'joy', 'fantastic', 'perfect', 'brilliant', 'beautiful', 'nice'];
+                const negative = ['bad', 'terrible', 'awful', 'horrible', 'hate', 'sad', 'angry', 'mad', 'frustrated', 'disappointed', 'worse', 'worst', 'ugly', 'stupid'];
+                
+                let score = 0;
+                tokens.forEach(t => {
+                    if (positive.includes(t)) score += 1;
+                    if (negative.includes(t)) score -= 1;
+                });
+                
+                return { score: score, polarity: score > 0 ? 'positive' : score < 0 ? 'negative' : 'neutral' };
+            }
+
+            extractTopics(tokens) {
+                const topics = {
+                    science: ['science', 'physics', 'chemistry', 'biology', 'research', 'study', 'experiment', 'theory', 'hypothesis'],
+                    tech: ['computer', 'code', 'programming', 'software', 'hardware', 'algorithm', 'data', 'ai', 'machine', 'learning'],
+                    math: ['math', 'number', 'calculate', 'equation', 'formula', 'algebra', 'geometry', 'statistics'],
+                    philosophy: ['philosophy', 'ethics', 'morality', 'existence', 'reality', 'consciousness', 'meaning', 'purpose', 'truth'],
+                    personal: ['feel', 'think', 'believe', 'opinion', 'advice', 'help', 'problem', 'question', 'myself', 'life'],
+                    creative: ['story', 'write', 'create', 'imagine', 'design', 'art', 'music', 'draw', 'paint', 'idea']
+                };
+
+                let detected = [];
+                for (let [topic, keywords] of Object.entries(topics)) {
+                    if (tokens.some(t => keywords.includes(t))) {
+                        detected.push(topic);
+                    }
+                }
+                return detected.length > 0 ? detected : ['general'];
+            }
+
+            extractEntities(tokens) {
+                const entities = {
+                    people: [],
+                    places: [],
+                    things: [],
+                    concepts: []
+                };
+
+                const conceptWords = this.memory.semantic.concepts.abstract;
+                tokens.forEach(t => {
+                    if (conceptWords.includes(t)) {
+                        entities.concepts.push(t);
+                    }
+                });
+
+                return entities;
+            }
+
+            classifyIntent(tokens, input) {
+                if (input.includes('?')) {
+                    if (tokens.some(t => ['what', 'define', 'explain', 'meaning'].includes(t))) return 'seek_information';
+                    if (tokens.some(t => ['how', 'way', 'method', 'steps'].includes(t))) return 'seek_procedure';
+                    if (tokens.some(t => ['why', 'reason', 'cause', 'because'].includes(t))) return 'seek_explanation';
+                    if (tokens.some(t => ['should', 'would', 'could', 'advice', 'recommend'].includes(t))) return 'seek_advice';
+                    return 'question';
+                }
+                
+                if (tokens.some(t => ['hello', 'hi', 'hey', 'greetings'].includes(t))) return 'greeting';
+                if (tokens.some(t => ['thanks', 'thank', 'thx', 'appreciate'].includes(t))) return 'gratitude';
+                if (tokens.some(t => ['bye', 'goodbye', 'see you', 'later'].includes(t))) return 'farewell';
+                if (tokens.some(t => ['tell', 'story', 'joke', 'create', 'write', 'imagine'].includes(t))) return 'creative_request';
+                if (tokens.some(t => ['help', 'assist', 'support', 'problem'].includes(t))) return 'request_help';
+                
+                return 'statement';
+            }
+
+            think(perception) {
+                this.memory.shortTerm.push(perception);
+                if (this.memory.shortTerm.length > 7) {
+                    this.consolidateMemory();
+                }
+
+                this.cognitiveState.workingMemory = this.memory.shortTerm.slice(-3);
+                this.cognitiveState.context = this.inferContext(perception);
+
+                const reasoning = this.reason(perception);
+                const response = this.generate(perception, reasoning);
+
+                this.learn(perception, response);
+
+                return response;
+            }
+
+            reason(perception) {
+                const { intent, topics, sentiment, entities } = perception;
+                
+                let reasoning = {
+                    type: null,
+                    confidence: 0,
+                    chain: []
+                };
+
+                if (intent === 'seek_information') {
+                    reasoning.type = 'retrieval';
+                    reasoning.chain.push('User wants information');
+                    reasoning.chain.push('Search semantic memory');
+                    reasoning.chain.push('Retrieve relevant facts');
+                    
+                    for (let topic of topics) {
+                        if (this.memory.semantic.facts[topic]) {
+                            reasoning.confidence = 0.8;
+                            reasoning.chain.push(`Found knowledge about ${topic}`);
+                        }
+                    }
+                }
+
+                if (intent === 'seek_explanation') {
+                    reasoning.type = 'causal';
+                    reasoning.chain.push('User wants explanation');
+                    reasoning.chain.push('Identify causal relationships');
+                    reasoning.chain.push('Build explanation chain');
+                    reasoning.confidence = 0.7;
+                }
+
+                if (intent === 'seek_advice') {
+                    reasoning.type = 'evaluative';
+                    reasoning.chain.push('User needs guidance');
+                    reasoning.chain.push('Consider multiple perspectives');
+                    reasoning.chain.push('Evaluate options');
+                    reasoning.chain.push('Recommend best approach');
+                    reasoning.confidence = 0.6;
+                }
+
+                if (intent === 'creative_request') {
+                    reasoning.type = 'generative';
+                    reasoning.chain.push('User wants creative output');
+                    reasoning.chain.push('Activate imagination');
+                    reasoning.chain.push('Combine concepts novelty');
+                    reasoning.confidence = 0.75;
+                }
+
+                if (sentiment.polarity === 'negative') {
+                    reasoning.chain.push('Detect negative emotion');
+                    reasoning.chain.push('Activate empathy response');
+                    this.memory.emotional.valence = -0.3;
+                }
+
+                if (sentiment.polarity === 'positive') {
+                    reasoning.chain.push('Detect positive emotion');
+                    reasoning.chain.push('Mirror positive affect');
+                    this.memory.emotional.valence = 0.3;
+                }
+
+                return reasoning;
+            }
+
+            generate(perception, reasoning) {
+                const { intent, topics, sentiment, tokens, questions } = perception;
+                
+                let response = '';
+                let contextual = this.cognitiveState.context;
+
+                if (intent === 'greeting') {
+                    const greetings = [
+                        "Hey! What's on your mind?",
+                        "Hi there! How can I help?",
+                        "Hello! What would you like to talk about?",
+                        "Hey! What brings you here today?"
+                    ];
+                    response = greetings[Math.floor(Math.random() * greetings.length)];
+                }
+                else if (intent === 'gratitude') {
+                    const thanks = [
+                        "You're welcome! Happy to help.",
+                        "Anytime! That's what I'm here for.",
+                        "My pleasure! Let me know if you need anything else.",
+                        "Glad I could help!"
+                    ];
+                    response = thanks[Math.floor(Math.random() * thanks.length)];
+                }
+                else if (intent === 'farewell') {
+                    response = "See you later! Feel free to come back anytime.";
+                }
+                else if (intent === 'seek_information') {
+                    let knowledge = [];
+                    for (let topic of topics) {
+                        if (this.memory.semantic.facts[topic]) {
+                            knowledge = knowledge.concat(this.memory.semantic.facts[topic]);
+                        }
+                    }
+                    
+                    if (knowledge.length > 0) {
+                        const relevant = knowledge.filter(fact => 
+                            tokens.some(t => fact.toLowerCase().includes(t))
+                        );
+                        
+                        if (relevant.length > 0) {
+                            response = `Based on what I know, ${relevant[0]}. ${relevant.length > 1 ? 'Also, ' + relevant[1] + '.' : ''} Would you like to know more?`;
+                        } else {
+                            response = `I have some knowledge about ${topics[0]}: ${knowledge[0]}. Is this related to what you're asking?`;
+                        }
+                    } else {
+                        response = "That's an interesting question. I'd need to think more deeply about that. Could you tell me more about what specifically you'd like to know?";
+                    }
+                }
+                else if (intent === 'seek_explanation') {
+                    response = "Let me break this down for you. " + this.constructExplanation(tokens, topics) + " Does this help clarify things?";
+                }
+                else if (intent === 'seek_advice') {
+                    if (sentiment.polarity === 'negative') {
+                        response = "I can sense this is important to you. " + this.giveAdvice(tokens, topics) + " What do you think about this approach?";
+                    } else {
+                        response = this.giveAdvice(tokens, topics) + " What feels right to you?";
+                    }
+                }
+                else if (intent === 'creative_request') {
+                    response = this.createContent(tokens, topics);
+                }
+                else if (intent === 'request_help') {
+                    response = "I'm here to help. " + this.provideHelp(tokens, topics, sentiment);
+                }
+                else {
+                    if (questions > 0) {
+                        response = this.respondToQuestion(tokens, topics, contextual);
+                    } else {
+                        response = this.conversationalResponse(tokens, topics, sentiment, contextual);
+                    }
+                }
+
+                return response;
+            }
+
+            constructExplanation(tokens, topics) {
+                const explanations = {
+                    science: "From a scientific perspective, this involves understanding the underlying mechanisms and principles that govern the phenomenon.",
+                    tech: "In technical terms, this works by processing information through systematic algorithms and data structures.",
+                    math: "Mathematically, we can represent this using equations and logical relationships between variables.",
+                    philosophy: "Philosophically, we need to examine the fundamental assumptions and implications of this concept.",
+                    general: "The way this works is through a series of interconnected processes that build upon each other."
+                };
+
+                return explanations[topics[0]] || explanations.general;
+            }
+
+            giveAdvice(tokens, topics) {
+                const advice = [
+                    "Consider approaching this from multiple angles. Sometimes the best solution comes from combining different perspectives.",
+                    "My suggestion would be to break this down into smaller, manageable steps. Start with what you can control.",
+                    "Think about what outcome you're really hoping for, then work backwards to identify the path.",
+                    "It might help to get input from others who've faced similar situations. Their experience could be valuable."
+                ];
+
+                return advice[Math.floor(Math.random() * advice.length)];
+            }
+
+            createContent(tokens, topics) {
+                if (tokens.includes('story')) {
+                    return "Here's a story: In a world where thoughts became reality, a curious mind discovered that the most powerful ideas were often the simplest ones. What started as a small question grew into an adventure that changed everything. What kind of story interests you?";
+                }
+                if (tokens.includes('joke')) {
+                    const jokes = [
+                        "Why don't scientists trust atoms? Because they make up everything!",
+                        "Parallel lines have so much in common. It's a shame they'll never meet.",
+                        "I told my computer I needed a break, and now it won't stop sending me Kit-Kats."
+                    ];
+                    return jokes[Math.floor(Math.random() * jokes.length)];
+                }
+                return "I'd love to create something with you. What did you have in mind? A story, poem, idea, or something else?";
+            }
+
+            provideHelp(tokens, topics, sentiment) {
+                if (sentiment.polarity === 'negative') {
+                    return "I understand you're dealing with something challenging. Let's work through this together. Can you tell me more about what's happening?";
+                }
+                return "I'm ready to assist. What specifically would you like help with?";
+            }
+
+            respondToQuestion(tokens, topics, context) {
+                const responses = [
+                    "That's a thought-provoking question. Based on what I understand, ",
+                    "Interesting question! Let me think about this. ",
+                    "Good question. Here's how I see it: ",
+                    "That makes me think. From my perspective, "
+                ];
+
+                let base = responses[Math.floor(Math.random() * responses.length)];
+                
+                if (context && context.topic) {
+                    base += `Building on what we discussed about ${context.topic}, `;
+                }
+
+                base += "I'd say it depends on how you look at it. What's your take?";
+                return base;
+            }
+
+            conversationalResponse(tokens, topics, sentiment, context) {
+                if (sentiment.polarity === 'positive') {
+                    return "I appreciate your positive energy! " + this.elaborateOnTopic(topics, tokens);
+                }
+                
+                if (sentiment.polarity === 'negative') {
+                    return "I hear you. " + this.showEmpathy() + " " + this.elaborateOnTopic(topics, tokens);
+                }
+
+                if (context && this.memory.shortTerm.length > 2) {
+                    return "That's interesting. It reminds me of what you mentioned earlier. " + this.elaborateOnTopic(topics, tokens);
+                }
+
+                return this.elaborateOnTopic(topics, tokens);
+            }
+
+            elaborateOnTopic(topics, tokens) {
+                const elaborations = {
+                    science: "Science is fascinating because it helps us understand the world through observation and testing.",
+                    tech: "Technology is constantly evolving. What we can do now was unimaginable just decades ago.",
+                    math: "Mathematics is the language of patterns and relationships. It's everywhere once you start looking.",
+                    philosophy: "Philosophy asks the big questions that don't always have clear answers, but exploring them matters.",
+                    personal: "Personal growth is a journey. We all face challenges and learn from them.",
+                    creative: "Creativity is about connecting ideas in new ways. Some of the best innovations come from unexpected combinations."
+                };
+
+                let response = elaborations[topics[0]] || "That's an interesting topic to explore.";
+                response += " What aspect interests you most?";
+                return response;
+            }
+
+            showEmpathy() {
+                return "I can understand why you'd feel that way.";
+            }
+
+            inferContext(perception) {
+                if (this.memory.shortTerm.length < 2) return null;
+
+                const prevTopics = this.memory.shortTerm.slice(-3).flatMap(p => p.topics || []);
+                const topicCounts = {};
+                prevTopics.forEach(t => topicCounts[t] = (topicCounts[t] || 0) + 1);
+                
+                const dominantTopic = Object.keys(topicCounts).reduce((a, b) => 
+                    topicCounts[a] > topicCounts[b] ? a : b, null
+                );
+
+                return {
+                    topic: dominantTopic,
+                    continuity: prevTopics.length > 0
+                };
+            }
+
+            consolidateMemory() {
+                const old = this.memory.shortTerm.shift();
+                this.memory.longTerm.push({
+                    timestamp: Date.now(),
+                    perception: old,
+                    importance: this.assessImportance(old)
+                });
+
+                if (this.memory.longTerm.length > 50) {
+                    this.memory.longTerm.shift();
+                }
+            }
+
+            assessImportance(perception) {
+                let score = 0;
+                if (perception.questions > 0) score += 0.3;
+                if (Math.abs(perception.sentiment.score) > 1) score += 0.4;
+                if (perception.topics.length > 1) score += 0.2;
+                if (perception.length > 10) score += 0.1;
+                return Math.min(score, 1.0);
+            }
+
+            learn(perception, response) {
+                this.memory.episodic.push({
+                    input: perception,
+                    output: response,
+                    timestamp: Date.now()
+                });
+
+                if (this.memory.episodic.length > 100) {
+                    this.memory.episodic.shift();
+                }
+
+                const newConcepts = perception.entities.concepts;
+                if (newConcepts.length > 0) {
+                    this.memory.semantic.concepts.abstract = [
+                        ...new Set([...this.memory.semantic.concepts.abstract, ...newConcepts])
+                    ];
+                }
+            }
+
+            recall(query) {
+                return this.memory.longTerm
+                    .filter(m => m.importance > 0.5)
+                    .slice(-10);
+            }
+        }
+
         const chat = document.getElementById('chat');
         const input = document.getElementById('input');
         const send = document.getElementById('send');
-        let history = [];
+        const brain = new Brain();
 
         function add(role, text) {
             const msg = document.createElement('div');
@@ -270,36 +722,15 @@
             send.disabled = true;
             
             add('user', text);
-            history.push({ role: 'user', content: text });
-            
             showTyping();
 
-            try {
-                const res = await fetch('https://api.anthropic.com/v1/messages', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: 'claude-sonnet-4-20250514',
-                        max_tokens: 1000,
-                        messages: history
-                    })
-                });
+            await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 800));
 
-                const data = await res.json();
-                
-                hideTyping();
-                
-                if (data.content && data.content[0]) {
-                    const reply = data.content[0].text;
-                    add('ai', reply);
-                    history.push({ role: 'assistant', content: reply });
-                } else {
-                    add('ai', 'Sorry, I had trouble processing that.');
-                }
-            } catch (err) {
-                hideTyping();
-                add('ai', 'Connection error. Please try again.');
-            }
+            const perception = brain.perceive(text);
+            const response = brain.think(perception);
+            
+            hideTyping();
+            add('ai', response);
             
             send.disabled = false;
             input.focus();
